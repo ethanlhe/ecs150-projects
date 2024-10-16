@@ -9,7 +9,6 @@
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        // No files provided
         std::cout << "wzip: file1 [file2 ...]" << std::endl;
         exit(1);
     }
@@ -18,11 +17,9 @@ int main(int argc, char* argv[]) {
     int count = 0;
     bool firstChar = true;
 
-    // Process each file
     for (int i = 1; i < argc; ++i) {
         int fd = open(argv[i], O_RDONLY);
         if (fd < 0) {
-            // Error opening file
             std::cout << "wzip: cannot open file" << std::endl;
             exit(1);
         }
@@ -34,15 +31,12 @@ int main(int argc, char* argv[]) {
             for (ssize_t j = 0; j < bytesRead; ++j) {
                 char ch = buffer[j];
                 if (firstChar) {
-                    // Initialize currentChar and count
                     currentChar = ch;
                     count = 1;
                     firstChar = false;
                 } else if (ch == currentChar) {
-                    // Same character, increment count
                     count++;
                 } else {
-                    // Different character, write the current run
                     ssize_t bytesWritten = write(STDOUT_FILENO, &count, sizeof(int));
                     if (bytesWritten != sizeof(int)) {
                         std::cout << "wzip: error writing to output" << std::endl;
@@ -55,7 +49,6 @@ int main(int argc, char* argv[]) {
                         close(fd);
                         exit(1);
                     }
-                    // Start new run
                     currentChar = ch;
                     count = 1;
                 }
@@ -63,7 +56,6 @@ int main(int argc, char* argv[]) {
         }
 
         if (bytesRead < 0) {
-            // Error reading file
             std::cout << "wzip: error reading file" << std::endl;
             close(fd);
             exit(1);
@@ -72,7 +64,6 @@ int main(int argc, char* argv[]) {
         close(fd);
     }
 
-    // Write any remaining run
     if (!firstChar && count > 0) {
         ssize_t bytesWritten = write(STDOUT_FILENO, &count, sizeof(int));
         if (bytesWritten != sizeof(int)) {
