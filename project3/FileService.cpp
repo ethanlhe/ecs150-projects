@@ -34,6 +34,12 @@ bool FileService::endswith(string str, string suffix) {
 }
 
 void FileService::get(HTTPRequest *request, HTTPResponse *response) {
+  // Security check: reject any pathname with ".."
+  if (request->getPath().find("..") != string::npos) {
+    response->setStatus(403);
+    return;
+  }
+
   string path = this->m_basedir + request->getPath();
   string fileContents = this->readFile(path);
   if (fileContents.size() == 0) {
